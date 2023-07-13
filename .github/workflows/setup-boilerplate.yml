@@ -1,0 +1,52 @@
+name: Setup boilerplate
+
+on:
+  workflow_call:
+    inputs:
+      boilerplate:
+        type: string
+        description: Name of a supported boilerplate
+        required: true
+      branch-name:
+        type: string
+        description: Branch to use for boilerplate setup
+        default: development
+        required: true
+
+jobs:
+  setup-boilerplate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Create or checkout branch
+        run: |
+          branch_name=${{ github.event.inputs.branch-name }}
+          git fetch --all
+          git checkout $branch_name || git checkout -b $branch_name
+      - name: Setup boilerplate
+        run: |
+          branch_name=${{ github.event.inputs.branch-name }}
+          boilerplate=${{ github.event.inputs.boilerplate }}
+          git clone https://github.com/DevSkillsHQ/$boilerplate.git
+          cp $boilerplate/package.json .
+          cp $boilerplate/cypress.json .
+          cp -r $boilerplate/app* .
+          rm -rf $boilerplate
+          npm i
+          git add cypress.json package* app*
+          git config --global user.email "setup-boilerplate@example.com"
+          git config --global user.name "Setup boilerplate"
+          git commit -m "Initialize boilerplate $boilerplate"
+          git push origin $branch_name
+      - name: Error summary
+        if: failure()
+        run: |
+          echo '## Failed to import ${{ github.event.inputs.boilerplate }}' >> $GITHUB_STEP_SUMMARY
+          echo 'Make sure ${{ github.event.inputs.boilerplate }} is a valid boilerplate name.' >> $GITHUB_STEP_SUMMARY
+          echo 'Check https://help.alvalabs.io/en/articles/7972852-supported-coding-test-boilerplates' >> $GITHUB_STEP_SUMMARY
+      - name: Success summary
+        if: success()
+        run: |
+          echo '## Successfully imported ${{ github.event.inputs.boilerplate }}' >> $GITHUB_STEP_SUMMARY
+          echo 'Run `git checkout ${{ github.event.inputs.branch-name }}` to start working on the challenge.' >> $GITHUB_STEP_SUMMARY
