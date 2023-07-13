@@ -20,37 +20,43 @@ jobs:
         with:
           ruby-version: 3.1.2
       
-      # Backend-specific config goes below
       - name: Update host
-        run: "sed 's/host.docker.internal/localhost/g' cypress.json > cypress.json.tmp && mv cypress.json.tmp cypress.json"
-      - name: Fetch apiUrl
-        run: echo ::set-output name=apiUrl::$(jq -r .env.apiUrl cypress.json)/ping
-        id: fetchApiUrl
+        run: "sed 's/host.docker.internal/localhost/g' cypress.config.js > temp.js && mv temp.js cypress.config.js"
 
       # Setting up the required test reporter for test results so we can parse them
       - name: Ensure mochawesome
         run: 'jq -r ".[\"devDependencies\"] |= (.mochawesome = \"^6.2.2\")" package.json > package.json.tmp && mv package.json.tmp package.json'
       - name: Install deps
         run: npm install
+        
+      - name: Fetch apiUrl
+        run: |
+          apiUrl=$(node -p "require('./cypress.config.js').env.apiUrl")
+          apiUrl=$apiUrl/ping
+          echo "apiUrl=$apiUrl" >> $GITHUB_ENV
+        shell: bash
+        
       - name: Update test reporter
-        run: 'jq -M ". + {\"reporter\": \"mochawesome\", \"reporterOptions\": { \"reportDir\": \"cypress/results\", \"overwrite\": false, \"html\": false, \"json\": true }}" cypress.json > cypress.json.tmp && mv cypress.json.tmp cypress.json'
+        run: |
+          sed 's/module.exports = defineConfig({/module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',/g' cypress.config.js > temp.js
+          mv temp.js cypress.config.js
       
       # Running tests for all challenges except Backend.
       - name: Run tests without waiting on API
-        if: steps.fetchApiUrl.outputs.apiUrl == ''
-        uses: cypress-io/github-action@v2
+        if: env.apiUrl == ''
+        uses: cypress-io/github-action@v5
         with:
           build: npm run build
           start: npm run start
           
       # Running tests for Backend challenges. Waiting on API is required.    
       - name: Run tests with waiting on API
-        if: steps.fetchApiUrl.outputs.apiUrl != ''
-        uses: cypress-io/github-action@v2
+        if: env.apiUrl != ''
+        uses: cypress-io/github-action@v5
         with:
           build: npm run build
           start: npm run start
-          wait-on: ${{ steps.fetchApiUrl.outputs.apiUrl }}
+          wait-on: ${{ env.apiUrl }}
       
       # Preparing test results and sending them to Alva
       - name: Fetch test results
