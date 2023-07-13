@@ -20,21 +20,22 @@ jobs:
         with:
           ruby-version: 3.1.2
       
-      # Backend-specific config goes below
       - name: Update host
         run: "sed 's/host.docker.internal/localhost/g' cypress.config.js > temp.js && mv temp.js cypress.config.js"
-      - name: Fetch apiUrl
-        run: |
-          apiUrl=$(node -p "require('./cypress.config.js').env.apiUrl")
-          apiUrl=$apiUrl/ping
-          echo "apiUrl=$apiUrl" >> $GITHUB_ENV
-        shell: bash
 
       # Setting up the required test reporter for test results so we can parse them
       - name: Ensure mochawesome
         run: 'jq -r ".[\"devDependencies\"] |= (.mochawesome = \"^6.2.2\")" package.json > package.json.tmp && mv package.json.tmp package.json'
       - name: Install deps
         run: npm install
+        
+      - name: Fetch apiUrl
+        run: |
+          apiUrl=$(node -p "require('./cypress.config.js').env.apiUrl")
+          apiUrl=$apiUrl/ping
+          echo "apiUrl=$apiUrl" >> $GITHUB_ENV
+        shell: bash
+        
       - name: Update test reporter
         run: |
           sed 's/module.exports = defineConfig({/module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',/g' cypress.config.js > temp.js
