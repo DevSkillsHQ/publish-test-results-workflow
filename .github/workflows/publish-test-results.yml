@@ -26,7 +26,8 @@ jobs:
       - name: Fetch apiUrl
         run: |
           URL=$(sed -n "s/.*apiUrl: *'\(.*\)'.*/\1/p" cypress.config.js)
-          echo ::set-output name=apiUrl::${URL}/ping
+          apiUrl=$(jq -r .env.apiUrl cypress.json)/ping
+          echo "apiUrl=$apiUrl" >> $GITHUB_ENV
         shell: bash
         id: fetchApiUrl
 
@@ -55,7 +56,7 @@ jobs:
         with:
           build: npm run build
           start: npm run start
-          wait-on: ${{ steps.fetchApiUrl.outputs.apiUrl }}
+          wait-on: ${{ env.apiUrl }}
       
       # Preparing test results and sending them to Alva
       - name: Fetch test results
