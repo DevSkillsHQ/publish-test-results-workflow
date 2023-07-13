@@ -1,11 +1,7 @@
 name: Publish test results to Alva
 on:
-  push:
-    branches:
-      - '*'
-      - '*/*'
-      - '!master'
-      - '!main'
+  workflow_call:
+
 jobs:
   tests:
     runs-on: ubuntu-20.04
