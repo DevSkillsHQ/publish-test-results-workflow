@@ -25,11 +25,10 @@ jobs:
         run: "sed 's/host.docker.internal/localhost/g' cypress.config.js > temp.js && mv temp.js cypress.config.js"
       - name: Fetch apiUrl
         run: |
-          URL=$(sed -n "s/.*apiUrl: *'\(.*\)'.*/\1/p" cypress.config.js)
-          apiUrl=$(jq -r .env.apiUrl cypress.json)/ping
+          apiUrl=$(node -p "require('./cypress.config.js').env.apiUrl")
+          apiUrl=$apiUrl/ping
           echo "apiUrl=$apiUrl" >> $GITHUB_ENV
         shell: bash
-        id: fetchApiUrl
 
       # Setting up the required test reporter for test results so we can parse them
       - name: Ensure mochawesome
@@ -43,7 +42,7 @@ jobs:
       
       # Running tests for all challenges except Backend.
       - name: Run tests without waiting on API
-        if: steps.fetchApiUrl.outputs.apiUrl == ''
+        if: env.apiUrl == ''
         uses: cypress-io/github-action@v5
         with:
           build: npm run build
@@ -51,7 +50,7 @@ jobs:
           
       # Running tests for Backend challenges. Waiting on API is required.    
       - name: Run tests with waiting on API
-        if: steps.fetchApiUrl.outputs.apiUrl != ''
+        if: env.apiUrl != ''
         uses: cypress-io/github-action@v5
         with:
           build: npm run build
