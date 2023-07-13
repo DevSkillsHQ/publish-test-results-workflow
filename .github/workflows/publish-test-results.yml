@@ -12,17 +12,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Install Java 17
+        uses: actions/setup-java@v2
+        with:
+         distribution: 'adopt'
+         java-version: '17'  
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1.2
+      - name: Update host
+        run: "sed 's/host.docker.internal/localhost/g' cypress.json > cypress.json.tmp && mv cypress.json.tmp cypress.json"
+      - name: Fetch apiUrl
+        run: echo ::set-output name=apiUrl::$(jq -r .env.apiUrl cypress.json)/ping
+        id: fetchApiUrl
       - name: Ensure mochawesome
         run: 'jq -r ".[\"devDependencies\"] |= (.mochawesome = \"^6.2.2\")" package.json > package.json.tmp && mv package.json.tmp package.json'
       - name: Install deps
         run: npm install
       - name: Update test reporter
         run: 'jq -M ". + {\"reporter\": \"mochawesome\", \"reporterOptions\": { \"reportDir\": \"cypress/results\", \"overwrite\": false, \"html\": false, \"json\": true }}" cypress.json > cypress.json.tmp && mv cypress.json.tmp cypress.json'
-      - name: Run tests
+      - name: Run tests without waiting on API
+        if: steps.fetchApiUrl.outputs.apiUrl == ''
         uses: cypress-io/github-action@v2
         with:
           build: npm run build
           start: npm run start
+      - name: Run tests with waiting on API
+        if: steps.fetchApiUrl.outputs.apiUrl != ''
+        uses: cypress-io/github-action@v2
+        with:
+          build: npm run build
+          start: npm run start
+          wait-on: ${{ steps.fetchApiUrl.outputs.apiUrl }}
       - name: Fetch test results
         if: always()
         run: "echo ::set-output name=results::$(jq -r '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/results/mochawesome.json)"
