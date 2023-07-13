@@ -1,2 +1,2 @@
-# setup-boilerplate-workflow
-Reusable workflow to initialize a language specific coding test boilerplate
+# publish-test-results
+Reusable workflow to run e2e Cypress tests and report results to Alva.
