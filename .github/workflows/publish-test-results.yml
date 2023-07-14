@@ -76,8 +76,11 @@ jobs:
           else
             echo "isTemplate=true" >> $GITHUB_ENV
           fi       
+      - name: Print isTemplate value
+        run: |
+          echo "isTemplate: ${{ env.isTemplate }}"
       - name: Publish test results with retries if candidate repo, i.e. not a template repo
-        if: always() && env.isTemplate != 'true'
+        if: always() && env.isTemplate == 'false'
         run: |
           retry=0
           max_retries=3
