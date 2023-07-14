@@ -38,8 +38,9 @@ jobs:
         
       - name: Update test reporter
         run: |
-          sed 's/module.exports = defineConfig({/module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',/g' cypress.config.js > temp.js
+          sed 's/module.exports = defineConfig({/module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',\n  reporterOptions: {\n    reportDir: '\"'cypress/reports/mocha'\"',\n    quiet: true,\n    overwrite: false,\n    html: false,\n    json: true\n  },/g' cypress.config.js > temp.js
           mv temp.js cypress.config.js
+
       
       # Running tests for all challenges except Backend.
       - name: Run tests without waiting on API
