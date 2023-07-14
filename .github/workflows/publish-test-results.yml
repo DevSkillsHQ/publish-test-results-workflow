@@ -61,8 +61,8 @@ jobs:
       # Preparing test results and sending them to Alva
       - name: Fetch test results
         if: always()
-        run: "echo ::set-output name=results::$(jq -r '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/reports/mocha/mochawesome.json)"
-        id: fetchTestResults
+        run: |
+          echo "testResults=$(jq -r '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/reports/mocha/mochawesome.json)" >> $GITHUB_ENV
       - name: Set repo env var
         if: always()
         run: echo "github_repo=$GITHUB_REPOSITORY" >> $GITHUB_ENV
@@ -72,12 +72,12 @@ jobs:
         run: |
           response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
           if echo "$response" | jq -e '.is_template == true' > /dev/null; then
-            echo "::set-output name=isTemplate::true"
+            echo "isTemplate=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=isTemplate::false"
+            echo "isTemplate=true" >> $GITHUB_ENV
           fi      
       - name: Publish test results with retries if candidate repo, i.e. not a template repo
-        if: always() && steps.checkTemplate.outputs.isTemplate == 'false'
+        if: always() && env.isTemplate == 'false'
         run: |
           retry=0
           max_retries=3
@@ -88,7 +88,7 @@ jobs:
             curl -s -o /dev/null -w "%{http_code}" \
               -X POST \
               -H "Content-Type: application/json" \
-              -d '{"assignmentRepository": "${{ env.github_repo }}","results": [${{ steps.fetchTestResults.outputs.results }}]}' \
+              -d '{"assignmentRepository": "${{ env.github_repo }}","results": [${{ env.testResults }}}]}' \
               ${{ vars.AUTO_SCORE_WEBHOOK_URL }}
             status=$?
             if [[ "$status" -ne 0 ]]; then
