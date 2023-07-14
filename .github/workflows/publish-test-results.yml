@@ -73,12 +73,8 @@ jobs:
           if echo "$response" | jq -e '.is_template == true' > /dev/null; then
             echo "isTemplate=true" >> $GITHUB_ENV
           else
-            echo "isTemplate=true" >> $GITHUB_ENV
+            echo "isTemplate=false" >> $GITHUB_ENV
           fi       
-      - name: Print isTemplate value
-        if: always()
-        run: |
-          echo "isTemplate: ${{ env.isTemplate }}"
       - name: Publish test results with retries if candidate repo, i.e. not a template repo
         if: always() && env.isTemplate == 'false'
         run: |
