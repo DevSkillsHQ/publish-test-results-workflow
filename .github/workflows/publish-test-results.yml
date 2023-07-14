@@ -87,7 +87,7 @@ jobs:
             curl -s -o /dev/null -w "%{http_code}" \
               -X POST \
               -H "Content-Type: application/json" \
-              -d '{"assignmentRepository": "${{ env.github_repo }}","results": "[${{ env.testResults }}]"}' \
+              -d '{"assignmentRepository": "${{ env.github_repo }}","results": [${{ env.testResults }}]}' \
               ${{ vars.AUTO_SCORE_WEBHOOK_URL }}
             status=$?
             if [[ "$status" -ne 0 ]]; then
