@@ -62,7 +62,7 @@ jobs:
       - name: Fetch test results
         if: always()
         run: |
-          echo "testResults=$(jq -r '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/reports/mocha/mochawesome.json)" >> $GITHUB_ENV
+          echo "testResults=$(jq -c '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/reports/mocha/mochawesome.json)" >> $GITHUB_ENV
       - name: Set repo env var
         if: always()
         run: echo "github_repo=$GITHUB_REPOSITORY" >> $GITHUB_ENV
@@ -88,7 +88,7 @@ jobs:
             curl -s -o /dev/null -w "%{http_code}" \
               -X POST \
               -H "Content-Type: application/json" \
-              -d '{"assignmentRepository": "${{ env.github_repo }}","results": [${{ env.testResults }}}]}' \
+              -d '{"assignmentRepository": "${{ env.github_repo }}","results": ['${{ env.testResults }}']}' \
               ${{ vars.AUTO_SCORE_WEBHOOK_URL }}
             status=$?
             if [[ "$status" -ne 0 ]]; then
