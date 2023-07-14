@@ -61,7 +61,7 @@ jobs:
       # Preparing test results and sending them to Alva
       - name: Fetch test results
         if: always()
-        run: "echo ::set-output name=results::$(jq -r '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/results/mochawesome.json)"
+        run: "echo ::set-output name=results::$(jq -r '[.results[].suites[].tests[] | {test: .title, result: .state}]' cypress/reports/mocha/mochawesome.json)"
         id: fetchTestResults
       - name: Set repo env var
         if: always()
