@@ -1,6 +1,9 @@
 name: Publish test results to Alva
 on:
   workflow_call:
+    secrets:
+      AUTO_SCORE_TOKEN:
+        required: false
 
 jobs:
   tests:
@@ -84,10 +87,15 @@ jobs:
           max_retries=3
           sleep_time=5  # seconds
           status=1  # any non-zero value
+          auth_header=""
+          if [ -n "${{ secrets.AUTO_SCORE_TOKEN }}" ]; then
+           auth_header="Authorization: Bearer ${{ secrets.AUTO_SCORE_TOKEN }}"
+          fi
           while [[ "$status" -ne 0 && "$retry" -lt "$max_retries" ]]; do
             echo "Attempt: $((retry+1))"
             curl -s -o /dev/null -w "%{http_code}" \
               -X POST \
+              -H "$auth_header" \
               -H "Content-Type: application/json" \
               -d '{"assignmentRepository": "${{ env.github_repo }}","results": [${{ env.testResults }}]}' \
               ${{ vars.AUTO_SCORE_WEBHOOK_URL }}
