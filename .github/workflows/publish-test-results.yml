@@ -11,20 +11,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+
         # Environment setup
       - name: Install Java 17
         uses: actions/setup-java@v3
         with:
-         distribution: 'adopt'
-         java-version: '17'  
+          distribution: "adopt"
+          java-version: "17"
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.1.2
+
       - name: Setup Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.11' 
+          python-version: '3.11'
+
       - name: Update host
         run: "sed 's/host.docker.internal/localhost/g' cypress.config.js > temp.js && mv temp.js cypress.config.js"
 
@@ -33,19 +37,19 @@ jobs:
         run: 'jq -r ".[\"devDependencies\"] |= (.mochawesome = \"^7.1.3\")" package.json > package.json.tmp && mv package.json.tmp package.json'
       - name: Install deps
         run: npm install
-        
+
       - name: Fetch apiUrl
         run: |
           apiUrl=$(node -p "require('./cypress.config.js').env.apiUrl")
           apiUrl=$apiUrl/ping
           echo "apiUrl=$apiUrl" >> $GITHUB_ENV
         shell: bash
-        
+
       - name: Update test reporter
         run: |
           sed 's#module.exports = defineConfig({#module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',\n  reporterOptions: {\n    reportDir: '\"'cypress/reports/mocha'\"',\n    quiet: true,\n    overwrite: false,\n    html: false,\n    json: true\n  },#g' cypress.config.js > temp.js
           mv temp.js cypress.config.js
-      
+
       # Running tests for all challenges except Backend.
       - name: Run tests without waiting on API
         if: env.apiUrl == ''
@@ -53,8 +57,23 @@ jobs:
         with:
           build: npm run build
           start: npm run start
-          
-      # Running tests for Backend challenges. Waiting on API is required.    
+
+      # https://github.com/cypress-io/github-action#artifacts
+      # after the test run completes store videos and any screenshots
+      - name: Store screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+      - name: Store videos
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+
+      # Running tests for Backend challenges. Waiting on API is required.
       - name: Run tests with waiting on API
         if: env.apiUrl != ''
         uses: cypress-io/github-action@v5
@@ -62,7 +81,7 @@ jobs:
           build: npm run build
           start: npm run start
           wait-on: ${{ env.apiUrl }}
-      
+
       # Preparing test results and sending them to Alva
       - name: Fetch test results
         if: always()
@@ -79,7 +98,7 @@ jobs:
             echo "isTemplate=true" >> $GITHUB_ENV
           else
             echo "isTemplate=false" >> $GITHUB_ENV
-          fi       
+          fi
       - name: Publish test results with retries if candidate repo, i.e. not a template repo
         if: always() && env.isTemplate == 'false'
         run: |
@@ -110,4 +129,3 @@ jobs:
             echo "All attempts failed after $max_retries retries."
             exit 1
           fi
-
