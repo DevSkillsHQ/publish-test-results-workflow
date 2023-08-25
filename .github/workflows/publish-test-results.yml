@@ -58,6 +58,15 @@ jobs:
           build: npm run build
           start: npm run start
 
+      # Running tests for Backend challenges. Waiting on API is required.
+      - name: Run tests with waiting on API
+        if: env.apiUrl != ''
+        uses: cypress-io/github-action@v5
+        with:
+          build: npm run build
+          start: npm run start
+          wait-on: ${{ env.apiUrl }}
+      
       # https://github.com/cypress-io/github-action#artifacts
       # after the test run completes store videos and any screenshots
       - name: Store screenshots
@@ -72,15 +81,6 @@ jobs:
           name: cypress-videos
           path: cypress/videos
           if-no-files-found: ignore
-
-      # Running tests for Backend challenges. Waiting on API is required.
-      - name: Run tests with waiting on API
-        if: env.apiUrl != ''
-        uses: cypress-io/github-action@v5
-        with:
-          build: npm run build
-          start: npm run start
-          wait-on: ${{ env.apiUrl }}
 
       # Preparing test results and sending them to Alva
       - name: Fetch test results
