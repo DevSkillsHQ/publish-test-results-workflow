@@ -91,13 +91,14 @@ jobs:
           if [ -n "${{ secrets.AUTO_SCORE_TOKEN }}" ]; then
            auth_header="Authorization: Bearer ${{ secrets.AUTO_SCORE_TOKEN }}"
           fi
+          escapedTestResults=$(echo "${{ env.testResults }}" | sed 's/"/\\"/g')
           while [[ "$status" -ne 0 && "$retry" -lt "$max_retries" ]]; do
             echo "Attempt: $((retry+1))"
             curl -s -o /dev/null -w "%{http_code}" \
               -X POST \
               -H "$auth_header" \
               -H "Content-Type: application/json" \
-              -d '{"assignmentRepository": "${{ env.github_repo }}","results": [${{ env.testResults }}]}' \
+              -d "{\"assignmentRepository\": \"${{ env.github_repo }}\",\"results\": [$escapedTestResults]}" \
               ${{ vars.AUTO_SCORE_WEBHOOK_URL }}
             status=$?
             if [[ "$status" -ne 0 ]]; then
