@@ -36,8 +36,10 @@ jobs:
         
       - name: Fetch apiUrl
         run: |
-          apiUrl=$(node -p "require('./cypress.config.js').env.apiUrl")
-          apiUrl=$apiUrl/ping
+          apiUrl=$(node -p "const config = require('./cypress.config.js').env; config?.apiUrl || ''")
+          if [[ ! -z "$apiUrl" ]]; then
+            apiUrl="$apiUrl/ping"
+          fi
           echo "apiUrl=$apiUrl" >> $GITHUB_ENV
         shell: bash
         
