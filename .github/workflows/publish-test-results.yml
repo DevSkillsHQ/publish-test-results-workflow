@@ -36,7 +36,7 @@ jobs:
         
       - name: Fetch apiUrl
         run: |
-          apiUrl=$(node -p "const config = require('./cypress.config.js').env; config?.apiUrl || ''")
+          apiUrl=$(grep "apiUrl:" cypress.config.js | awk -F": " '{print $2}' | tr -d "',")
           if [[ ! -z "$apiUrl" ]]; then
             apiUrl="$apiUrl/ping"
           fi
