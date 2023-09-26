@@ -26,8 +26,12 @@ jobs:
         with:
           python-version: '3.11' 
       - name: Update host
-        run: "sed 's/host.docker.internal/localhost/g' cypress.config.js > temp.js && mv temp.js cypress.config.js"
-
+        run: |
+          if [ -f cypress.config.js ]; then
+            sed 's/host.docker.internal/localhost/g' cypress.config.js > temp.js && mv temp.js cypress.config.js
+          else
+            sed 's/host.docker.internal/localhost/g' cypress.config.cjs > temp.cjs && mv temp.cjs cypress.config.cjs
+          fi
       # Setting up the required test reporter for test results so we can parse them
       - name: Ensure mochawesome
         run: 'jq -r ".[\"devDependencies\"] |= (.mochawesome = \"^7.1.3\")" package.json > package.json.tmp && mv package.json.tmp package.json'
