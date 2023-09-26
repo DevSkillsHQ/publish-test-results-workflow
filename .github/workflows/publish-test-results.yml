@@ -36,11 +36,14 @@ jobs:
         
       - name: Fetch apiUrl
         run: |
-          apiUrl=$(grep "apiUrl:" cypress.config.js | awk -F": " '{print $2}' | tr -d "',")
+          apiUrl=$(grep "apiUrl:" cypress.config.js | awk -F": " '{print $2}' | tr -d "'," || echo "")
+
           if [[ ! -z "$apiUrl" ]]; then
             apiUrl="$apiUrl/ping"
           fi
+          
           echo "apiUrl=$apiUrl" >> $GITHUB_ENV
+
         shell: bash
         
       - name: Update test reporter
