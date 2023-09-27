@@ -31,7 +31,7 @@ jobs:
           if [ -f cypress.config.js ]; then
             echo "config_file=cypress.config.js" >> $GITHUB_ENV
           else
-            echo "config_file=cypress.config.cjs" >> $GITHUB_ENV
+            echo "config_file=cypress.config.ts" >> $GITHUB_ENV
           fi
         shell: bash
 
