@@ -58,7 +58,8 @@ jobs:
         
       - name: Update test reporter
         run: |
-          sed 's#module.exports = defineConfig({#module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',\n  reporterOptions: {\n    reportDir: '\"'cypress/reports/mocha'\"',\n    quiet: true,\n    overwrite: false,\n    html: false,\n    json: true\n  },#g' ${{ env.config_file }} > temp
+          sed 's#module.exports = defineConfig({#module.exports = defineConfig({\n  reporter: '\"'mochawesome'\"',\n  reporterOptions: {\n    reportDir: '\"'cypress/reports/mocha'\"',\n    quiet: true,\n    overwrite: false,\n    html: false,\n    json: true\n  },#g' ${{ env.config_file }} > temp_js
+          sed 's#export default defineConfig({#export default defineConfig({\n  reporter: '\"'mochawesome'\"',\n  reporterOptions: {\n    reportDir: '\"'cypress/reports/mocha'\"',\n    quiet: true,\n    overwrite: false,\n    html: false,\n    json: true\n  },#g' temp_js > temp
           mv temp ${{ env.config_file }}
       
       # Running tests for all challenges except Backend.
