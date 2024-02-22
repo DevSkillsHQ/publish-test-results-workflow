@@ -47,7 +47,9 @@ jobs:
       - name: Fetch apiUrl
         run: |
           apiUrl=$(grep "apiUrl:" ${{ env.config_file }} | awk -F": " '{print $2}' | tr -d "'," || echo "")
-
+          
+          # replace double quotes in apiUrl, needed to support cypress.config.js with double quote strings
+          apiUrl="${apiUrl//\"/}"
           if [[ ! -z "$apiUrl" ]]; then
             apiUrl="$apiUrl/ping"
           fi
