@@ -13,10 +13,10 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         # Environment setup
       - name: Install Java 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
          distribution: 'adopt'
          java-version: '17'  
@@ -25,7 +25,7 @@ jobs:
         with:
           ruby-version: 3.2.2
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11' 
 
@@ -70,7 +70,7 @@ jobs:
       # Running tests for all challenges except Backend.
       - name: Run tests without waiting on API
         if: env.apiUrl == ''
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           build: npm run build
           start: npm run start
@@ -78,7 +78,7 @@ jobs:
       # Running tests for Backend challenges. Waiting on API is required.    
       - name: Run tests with waiting on API
         if: env.apiUrl != ''
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
           build: npm run build
           start: npm run start
