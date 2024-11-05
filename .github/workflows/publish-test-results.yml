@@ -1,6 +1,13 @@
 name: Publish test results to Alva
 on:
   workflow_call:
+    inputs:
+      with_aws_cli:
+        type: boolean
+        default: false
+      with_terraform_cli:
+        type: boolean
+        default: false
     secrets:
       AUTO_SCORE_TOKEN:
         required: false
@@ -27,7 +34,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' 
+          python-version: '3.11'
+      # Optional: Install AWS CLI
+      - name: Install AWS CLI
+        if: env.WITH_AWS_CLI == 'true'
+        run: pip install awscli
+      # Optional: Install Terraform CLI
+      - name: Install Terraform CLI
+        if: env.WITH_TERRAFORM_CLI == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
 
       - name: Determine config file
         run: |
