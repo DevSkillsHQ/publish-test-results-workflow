@@ -2,10 +2,13 @@ name: Publish test results to Alva
 on:
   workflow_call:
     inputs:
-      with_aws_cli:
+      aws_cli:
         type: boolean
         default: false
-      with_terraform_cli:
+      terraform_cli:
+        type: boolean
+        default: false
+      docker_compose:
         type: boolean
         default: false
     secrets:
@@ -21,31 +24,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        # Environment setup
-      - name: Install Java 21
-        uses: actions/setup-java@v4
-        with:
-         distribution: 'microsoft'
-         java-version: '21'
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2.2
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       # Optional: Install AWS CLI
       - name: Install AWS CLI
-        if: env.WITH_AWS_CLI == 'true'
+        if: inputs.aws_cli == 'true'
         run: pip install awscli
       # Optional: Install Terraform CLI
       - name: Install Terraform CLI
-        if: env.WITH_TERRAFORM_CLI == 'true'
+        if: inputs.terraform_cli == 'true'
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.7
-
+      - name: Install Docker Compose
+        if: inputs.docker_compose == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
       - name: Determine config file
         run: |
           if [ -f cypress.config.js ]; then
