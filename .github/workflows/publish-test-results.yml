@@ -38,11 +38,6 @@ jobs:
       - name: Install Terraform CLI
         if: inputs.cloud_challenge
         uses: hashicorp/setup-terraform@v3
-      - name: Install Docker Compose
-        if: inputs.cloud_challenge
-        run: |
-          docker version
-          docker compose version
       - name: Determine config file
         run: |
           if [ -f cypress.config.js ]; then
