@@ -13,7 +13,11 @@ jobs:
   tests:
     runs-on: ubuntu-24.04
     concurrency:
-      group: alva_test_results
+      # Pull request runs (Dependabot in the boilerplate templates) get a group per PR, so
+      # PRs opened together stop cancelling each other. Every other event, which is how
+      # candidate and challenge repos call this (on: push), keeps the single repo-wide group,
+      # so a newer push still replaces the scoring run of an older one.
+      group: ${{ github.event_name == 'pull_request' && format('alva_test_results-{0}', github.ref) || 'alva_test_results' }}
       cancel-in-progress: true
     steps:
       - name: Checkout
