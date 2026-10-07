@@ -5,6 +5,15 @@ on:
       cloud_challenge:
         type: boolean
         default: false
+      python_version:
+        type: string
+        default: '3.11'
+      ruby_version:
+        type: string
+        default: '3.2.2'
+      java_version:
+        type: string
+        default: '21'
     secrets:
       AUTO_SCORE_TOKEN:
         required: false
@@ -19,19 +28,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         # Environment setup
-      - name: Install Java 21
+      - name: Install Java
         uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
-          java-version: '21'
+          java-version: ${{ inputs.java_version }}
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.2
+          ruby-version: ${{ inputs.ruby_version }}
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ inputs.python_version }}
       - name: Install AWS CLI
         if: inputs.cloud_challenge
         run: pip install awscli
