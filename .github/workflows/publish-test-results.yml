@@ -13,7 +13,7 @@ jobs:
   tests:
     runs-on: ubuntu-24.04
     concurrency:
-      group: alva_test_results
+      group: ${{ github.event_name == 'pull_request' && format('alva_test_results-{0}', github.ref) || 'alva_test_results' }}
       cancel-in-progress: true
     steps:
       - name: Checkout
