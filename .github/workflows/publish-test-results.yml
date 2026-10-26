@@ -104,7 +104,7 @@ jobs:
       # Running tests for all challenges except Backend.
       - name: Run tests without waiting on API
         if: env.apiUrl == ''
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           build: npm run build
           start: npm run start
@@ -112,7 +112,7 @@ jobs:
       # Running tests for Backend challenges. Waiting on API is required.    
       - name: Run tests with waiting on API
         if: env.apiUrl != ''
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           build: npm run build
           start: npm run start
